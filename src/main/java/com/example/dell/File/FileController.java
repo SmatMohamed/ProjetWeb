@@ -1,5 +1,7 @@
 package com.example.dell.File;
 
+import com.example.dell.Docs.Document;
+import com.example.dell.filliere.filliere;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -10,15 +12,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/files")
 public class FileController {
+
 
     private final FileService fileService;
 
     @Autowired
     public FileController(FileService fileService) {
         this.fileService = fileService;
+    }
+
+    @GetMapping("/{idmat}/download")
+    public ResponseEntity<List<FileEntity>> getDocumentsByFaculty(@PathVariable Long idmat) {
+        List<FileEntity> files = fileService.getFileByIdmatiere(idmat);
+        return ResponseEntity.ok(files);
     }
     @GetMapping("/download/{fileId}")
     public ResponseEntity<Resource> downloadFile(@PathVariable Long fileId) {
@@ -35,11 +46,16 @@ public class FileController {
                 .body(resource);
     }
 
-    @PostMapping("/upload")
-    public ResponseEntity<FileEntity> uploadFile(@RequestParam("file") MultipartFile file) {
-        FileEntity uploadedFile = fileService.uploadFile(file);
+    @PostMapping("/{idmatiere}/upload")
+    public ResponseEntity<FileEntity> uploadFile(@PathVariable Long idmatiere,@RequestParam("file") MultipartFile file) {
+
+        Document d=new Document();
+        d.setId(idmatiere);
+        FileEntity uploadedFile = fileService.uploadFile(file,d);
         return new ResponseEntity<>(uploadedFile, HttpStatus.CREATED);
     }
+
+
 
     // Add more controller methods for file operations (download, update, delete) as needed
 }

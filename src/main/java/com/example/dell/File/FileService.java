@@ -1,4 +1,5 @@
 package com.example.dell.File;
+import com.example.dell.Docs.Document;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -6,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -18,13 +20,15 @@ public class FileService {
         this.fileRepository = fileRepository;
     }
 
-    public FileEntity uploadFile(MultipartFile file) {
+    public FileEntity uploadFile(MultipartFile file, Document d) {
         try {
             // Read the file content into a byte array
             byte[] fileContent = getFileBytes(file.getInputStream());
 
             // Create a new FileEntity object and set its properties
+
             FileEntity fileEntity = new FileEntity();
+            fileEntity.setDocument(d);
             fileEntity.setFileName(Objects.requireNonNull(file.getOriginalFilename()));
             fileEntity.setFileType(Objects.requireNonNull(file.getContentType()));
             fileEntity.setFileContent(fileContent);
@@ -43,6 +47,11 @@ public class FileService {
     private byte[] getFileBytes(InputStream inputStream) throws IOException {
         return IOUtils.toByteArray(inputStream);
     }
+
+    public List<FileEntity> getFileByIdmatiere(Long idmat) {
+        return fileRepository.findByDocument_Idmatiere(idmat);
+    }
+
     public FileEntity getFileById(Long fileId) {
         return fileRepository.findById(fileId)
                 .orElseThrow(() -> new RuntimeException("File not found with id: " + fileId));
